@@ -1,0 +1,14 @@
+{
+  "name": "ghost-backup",
+  "version": "1.0.0",
+  "description": "Ghost CMS one-click full-system backup & restore plugin — database (SQLite/MySQL) + media assets",
+  "main": "src/index.js",
+  "scripts": {
+    "postinstall": "node scripts/postinstall.js",
+    "preuninstall": "node scripts/uninstall.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "tar": "^7.4.0"
+  }
+}
