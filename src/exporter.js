@@ -37,7 +37,8 @@ async function createBackup(res) {
         fs.mkdirSync(tmpDir, { recursive: true });
 
         // 3. Dump the database
-        if (dbConfig.client === 'sqlite3') {
+        const isSqlite = dbConfig.client === 'sqlite3' || dbConfig.client === 'better-sqlite3';
+        if (isSqlite) {
             await dumpSqlite(dbConfig, tmpDir);
         } else {
             await dumpMysql(dbConfig, tmpDir);
@@ -60,7 +61,7 @@ async function createBackup(res) {
             ghostVersion,
             nodeVersion: process.version,
             dbClient: dbConfig.client,
-            dbFilename: dbConfig.client === 'sqlite3' ? 'db_dump.sqlite3' : 'db_dump.sql',
+            dbFilename: (dbConfig.client === 'sqlite3' || dbConfig.client === 'better-sqlite3') ? 'db_dump.sqlite3' : 'db_dump.sql',
             contentPath,
             mediaDirs
         };
@@ -183,19 +184,11 @@ function dumpMysql(dbConfig, tmpDir) {
  * Recursively copy a directory preserving structure and permissions.
  */
 function copyDirRecursive(src, dest) {
-    if (!fs.existsSync(src)) return;
-    fs.mkdirSync(dest, { recursive: true });
-
-    const entries = fs.readdirSync(src, { withFileTypes: true });
-    for (const entry of entries) {
-        const srcPath = path.join(src, entry.name);
-        const destPath = path.join(dest, entry.name);
-
-        if (entry.isDirectory()) {
-            copyDirRecursive(srcPath, destPath);
-        } else if (entry.isFile() || entry.isSymbolicLink()) {
-            fs.copyFileSync(srcPath, destPath);
-        }
+    if (!fs.existsSync(src) && !fs.lstatSync(src, { throwIfNoEntry: false })) return;
+    try {
+        fs.cpSync(src, dest, { recursive: true, force: true, dereference: false, preserveTimestamps: true });
+    } catch (err) {
+        console.warn(`[ghost-backup] Warning: Could not fully copy ${src}: ${err.message}`);
     }
 }
 

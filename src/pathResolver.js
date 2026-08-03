@@ -132,14 +132,14 @@ function normalizeDbConfig(dbConfig) {
     const client = dbConfig.client.toLowerCase();
     const conn = dbConfig.connection || {};
 
-    if (client === 'sqlite3') {
+    if (client === 'sqlite3' || client === 'better-sqlite3') {
         let filename = conn.filename || '';
         // Resolve relative paths against Ghost root
         if (filename && !path.isAbsolute(filename)) {
             filename = path.resolve(ghostRoot, filename);
         }
         return {
-            client: 'sqlite3',
+            client: client,
             connection: { filename }
         };
     }
