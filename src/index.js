@@ -90,5 +90,6 @@ BackupAdapter.prototype._initBackup = function() {
 BackupAdapter.prototype.schedule = function(object) {};
 BackupAdapter.prototype.unschedule = function(object) {};
 BackupAdapter.prototype.run = function() {};
+BackupAdapter.prototype.register = function(object) {};
 
 module.exports = BackupAdapter;

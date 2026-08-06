@@ -36,7 +36,6 @@ async function restoreBackup(req) {
         await tar.extract({
             file: archivePath,
             cwd: extractDir,
-            strict: true,
             // Path traversal defense: reject any entries that escape the extract root
             filter: (entryPath) => {
                 const resolved = path.resolve(extractDir, entryPath);
@@ -67,16 +66,19 @@ async function restoreBackup(req) {
 
         console.log(`[ghost-backup] Manifest validated. Backup from: ${manifest.timestamp}, DB: ${manifest.dbClient}, Ghost: ${manifest.ghostVersion}`);
 
-        // 4. Cross-client guard: verify backup DB client matches current environment
+        // 4. Cross-client guard: verify backup DB engine matches current environment
         const currentDbConfig = pathResolver.resolveDbConfig();
         if (!currentDbConfig) {
             throw new Error('Could not resolve current database configuration. Restore aborted.');
         }
 
-        if (manifest.dbClient !== currentDbConfig.client) {
+        const isBackupSqlite = manifest.dbClient === 'sqlite3' || manifest.dbClient === 'better-sqlite3';
+        const isCurrentSqlite = currentDbConfig.client === 'sqlite3' || currentDbConfig.client === 'better-sqlite3';
+
+        if (isBackupSqlite !== isCurrentSqlite) {
             throw new Error(
-                `Database client mismatch: backup uses "${manifest.dbClient}" but this Ghost instance uses "${currentDbConfig.client}". ` +
-                `Cross-client restoration is not supported.`
+                `Database engine mismatch: backup uses "${manifest.dbClient}" but this Ghost instance uses "${currentDbConfig.client}". ` +
+                `Cross-engine restoration is not supported.`
             );
         }
 
@@ -87,7 +89,7 @@ async function restoreBackup(req) {
         }
 
         // 6. Restore the database
-        if (currentDbConfig.client === 'sqlite3') {
+        if (isCurrentSqlite) {
             await restoreSqlite(currentDbConfig, dumpFilePath);
         } else {
             await restoreMysql(currentDbConfig, dumpFilePath);
@@ -256,19 +258,11 @@ async function restoreMediaDirs(extractedContentDir, targetContentDir) {
  * Recursively copy a directory preserving structure and permissions.
  */
 function copyDirRecursive(src, dest) {
-    if (!fs.existsSync(src)) return;
-    fs.mkdirSync(dest, { recursive: true });
-
-    const entries = fs.readdirSync(src, { withFileTypes: true });
-    for (const entry of entries) {
-        const srcPath = path.join(src, entry.name);
-        const destPath = path.join(dest, entry.name);
-
-        if (entry.isDirectory()) {
-            copyDirRecursive(srcPath, destPath);
-        } else if (entry.isFile() || entry.isSymbolicLink()) {
-            fs.copyFileSync(srcPath, destPath);
-        }
+    if (!fs.existsSync(src) && !fs.lstatSync(src, { throwIfNoEntry: false })) return;
+    try {
+        fs.cpSync(src, dest, { recursive: true, force: true, dereference: false, preserveTimestamps: true });
+    } catch (err) {
+        console.warn(`[ghost-backup] Warning: Could not fully restore ${src}: ${err.message}`);
     }
 }
 
