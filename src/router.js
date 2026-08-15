@@ -138,6 +138,10 @@ async function requireAdminAuth(req, res, next) {
     }
   }
 
+  if (req.accepts('html') && !req.path.startsWith('/api')) {
+    return res.redirect('/ghost/#/signin');
+  }
+
   res.status(401).json({ error: 'Unauthorized. Ghost Admin session required.' });
 }
 

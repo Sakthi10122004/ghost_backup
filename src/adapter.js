@@ -23,11 +23,18 @@ module.exports = {
             global.__ghostCooperativeScripts.push('/ghost/backup/inject.js');
         }
 
-        if (ghostExpress && ghostExpress.response) {
+        let expressLib;
+        try {
+            expressLib = require(path.join(process.cwd(), 'current/core/shared/express'))._express || require('express');
+        } catch (e) {
+            expressLib = localExpress;
+        }
+
+        if (expressLib && expressLib.response) {
             // Hook res.send cooperatively (idempotent — checks flag)
-            if (!ghostExpress.response._cooperativeSendHooked) {
-                const originalSend = ghostExpress.response.send;
-                ghostExpress.response.send = function(body) {
+            if (!expressLib.response._cooperativeSendHooked) {
+                const originalSend = expressLib.response.send;
+                expressLib.response.send = function(body) {
                     const contentEncoding = this.getHeader('content-encoding');
                     const hasEncoding = contentEncoding && contentEncoding !== 'identity';
                     
@@ -49,13 +56,13 @@ module.exports = {
                     }
                     return originalSend.call(this, body);
                 };
-                ghostExpress.response._cooperativeSendHooked = true;
+                expressLib.response._cooperativeSendHooked = true;
             }
 
             // Hook res.sendFile cooperatively (idempotent — checks flag)
-            if (!ghostExpress.response._cooperativeSendFileHooked) {
-                const originalSendFile = ghostExpress.response.sendFile;
-                ghostExpress.response.sendFile = function(filePath) {
+            if (!expressLib.response._cooperativeSendFileHooked) {
+                const originalSendFile = expressLib.response.sendFile;
+                expressLib.response.sendFile = function(filePath) {
                     if (filePath && typeof filePath === 'string' && filePath.endsWith('index.html')) {
                         try {
                             const cacheKey = path.resolve(filePath);
@@ -71,7 +78,7 @@ module.exports = {
                     }
                     return originalSendFile.apply(this, arguments);
                 };
-                ghostExpress.response._cooperativeSendFileHooked = true;
+                expressLib.response._cooperativeSendFileHooked = true;
             }
         }
 

@@ -4,6 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ghost Backup & Restore</title>
+    <script>
+        (function() {
+            try {
+                const theme = localStorage.getItem('ghost-admin-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            } catch (e) {}
+        })();
+    </script>
     <style>
         :root {
             --bg-primary: #ffffff;
@@ -362,9 +374,7 @@
             <div class="header-left">
                 <div class="header-icon">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7 10 12 15 17 10"></polyline>
-                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                        <polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line>
                     </svg>
                 </div>
                 <div>
@@ -372,7 +382,7 @@
                     <p>Full-system snapshots — database and media assets</p>
                 </div>
             </div>
-            <button class="close-btn" onclick="window.parent.closeBackupOverlay && window.parent.closeBackupOverlay()">
+            <button class="close-btn" onclick="window.parent && window.parent !== window ? window.parent.location.hash = '#/settings' : window.location.href = '/ghost/#/settings'">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
         </div>
@@ -481,26 +491,7 @@
     </div>
 
     <script>
-        // ── Theme Detection ──────────────────────────────────────
-        function syncTheme() {
-            try {
-                const parentTheme = window.parent.localStorage.getItem('ghost-admin-theme');
-                if (parentTheme === 'dark') {
-                    document.documentElement.classList.add('dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                }
-            } catch (e) {
-                // Cross-origin — check parent's document
-                try {
-                    if (window.parent.document.documentElement.classList.contains('dark')) {
-                        document.documentElement.classList.add('dark');
-                    }
-                } catch (e2) {}
-            }
-        }
-        syncTheme();
-        setInterval(syncTheme, 1000);
+
 
         // ── State ────────────────────────────────────────────────
         let selectedFile = null;
