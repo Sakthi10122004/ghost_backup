@@ -66,20 +66,19 @@ async function restoreBackup(req) {
 
         console.log(`[ghost-backup] Manifest validated. Backup from: ${manifest.timestamp}, DB: ${manifest.dbClient}, Ghost: ${manifest.ghostVersion}`);
 
-        // 4. Cross-client guard: verify backup DB engine matches current environment
-        const currentDbConfig = pathResolver.resolveDbConfig();
-        if (!currentDbConfig) {
-            throw new Error('Could not resolve current database configuration. Restore aborted.');
-        }
+        // 4. Validate DB Format
+        if (manifest.dbFormat !== 'json') {
+            // Fallback for legacy SQL backups
+            const currentDbConfig = pathResolver.resolveDbConfig();
+            const isBackupSqlite = manifest.dbClient === 'sqlite3' || manifest.dbClient === 'better-sqlite3';
+            const isCurrentSqlite = currentDbConfig.client === 'sqlite3' || currentDbConfig.client === 'better-sqlite3';
 
-        const isBackupSqlite = manifest.dbClient === 'sqlite3' || manifest.dbClient === 'better-sqlite3';
-        const isCurrentSqlite = currentDbConfig.client === 'sqlite3' || currentDbConfig.client === 'better-sqlite3';
-
-        if (isBackupSqlite !== isCurrentSqlite) {
-            throw new Error(
-                `Database engine mismatch: backup uses "${manifest.dbClient}" but this Ghost instance uses "${currentDbConfig.client}". ` +
-                `Cross-engine restoration is not supported.`
-            );
+            if (isBackupSqlite !== isCurrentSqlite) {
+                throw new Error(
+                    `Database engine mismatch: legacy backup uses "${manifest.dbClient}" but this Ghost instance uses "${currentDbConfig.client}". ` +
+                    `Cross-engine restoration is only supported for backups created with the newer engine-agnostic format.`
+                );
+            }
         }
 
         // 5. Verify the dump file exists in the extracted archive
@@ -89,10 +88,29 @@ async function restoreBackup(req) {
         }
 
         // 6. Restore the database
-        if (isCurrentSqlite) {
-            await restoreSqlite(currentDbConfig, dumpFilePath);
+        if (manifest.dbFormat === 'json') {
+            const { getGhostPath } = require('./utils');
+            const dataImporterPath = getGhostPath('core/server/data/importer/importers/data/data-importer');
+            if (!dataImporterPath) {
+                throw new Error('Could not locate Ghost native DataImporter module.');
+            }
+            
+            const DataImporter = require(dataImporterPath);
+            console.log(`[ghost-backup] Parsing engine-agnostic JSON database dump...`);
+            let importData = { data: JSON.parse(fs.readFileSync(dumpFilePath, 'utf8')) };
+            
+            console.log(`[ghost-backup] Starting engine-agnostic JSON import...`);
+            importData = await DataImporter.preProcess(importData);
+            await DataImporter.doImport(importData, { returnImportedData: true });
         } else {
-            await restoreMysql(currentDbConfig, dumpFilePath);
+            // Legacy SQL Restore
+            const currentDbConfig = pathResolver.resolveDbConfig();
+            const isCurrentSqlite = currentDbConfig.client === 'sqlite3' || currentDbConfig.client === 'better-sqlite3';
+            if (isCurrentSqlite) {
+                await restoreSqlite(currentDbConfig, dumpFilePath);
+            } else {
+                await restoreMysql(currentDbConfig, dumpFilePath);
+            }
         }
 
         // 7. Restore media assets

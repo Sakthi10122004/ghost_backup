@@ -65,13 +65,10 @@ module.exports = {
                 expressLib.response.sendFile = function(filePath) {
                     if (filePath && typeof filePath === 'string' && filePath.endsWith('index.html')) {
                         try {
-                            const cacheKey = path.resolve(filePath);
-                            if (!cachedIndexHtmlByPath.has(cacheKey)) {
-                                cachedIndexHtmlByPath.set(cacheKey, fs.readFileSync(filePath, 'utf8'));
-                            }
+                            const content = fs.readFileSync(filePath, 'utf8');
                             this.removeHeader('ETag');
                             this.removeHeader('Content-Length');
-                            return this.send(cachedIndexHtmlByPath.get(cacheKey));
+                            return this.send(content);
                         } catch (e) {
                             console.error('[ghost-backup] Cooperative sendFile error:', e);
                         }

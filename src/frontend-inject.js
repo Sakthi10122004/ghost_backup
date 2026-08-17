@@ -187,7 +187,7 @@
                             }
 
                             if (typeof plugin.onMount === 'function') {
-                                plugin.onMount();
+                                plugin.onMount(wrapper);
                             }
                         }
                     });
@@ -217,6 +217,57 @@
         id: 'ghost-backup',
         title: 'Backup & Restore',
         svgIcon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>`,
+        onMount: (wrapper) => {
+            // Scope the query to the wrapper in case of document fragment issues or shadow DOMs
+            const btn = (wrapper || document).querySelector('#ghost-backup-open-console');
+            if (btn && !btn.hasAttribute('data-bound')) {
+                btn.setAttribute('data-bound', 'true');
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (document.getElementById('ghost-backup-modal')) return;
+                    
+                    const overlay = document.createElement('div');
+                    overlay.id = 'ghost-backup-modal';
+                    // Fallback to inline styles for z-index and positioning because Ghost's Tailwind JIT compiler 
+                    // won't recognize arbitrary classes (like z-[99999]) injected at runtime.
+                    overlay.className = 'flex items-center justify-center p-4 md:p-10';
+                    overlay.style.position = 'fixed';
+                    overlay.style.top = '0';
+                    overlay.style.left = '0';
+                    overlay.style.right = '0';
+                    overlay.style.bottom = '0';
+                    overlay.style.zIndex = '2147483647'; // Maximum z-index
+                    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.6)';
+                    overlay.style.backdropFilter = 'blur(4px)';
+                    
+                    overlay.innerHTML = `
+                        <div class="relative w-full max-w-[600px] h-full max-h-[85vh] bg-white dark:bg-[#15171a] rounded-xl overflow-hidden shadow-2xl flex flex-col border border-border-default" style="animation: backupModalPop 0.2s ease-out; max-width: 600px;">
+                            <style>
+                                @keyframes backupModalPop {
+                                    from { opacity: 0; transform: scale(0.97); }
+                                    to { opacity: 1; transform: scale(1); }
+                                }
+                            </style>
+                            <iframe src="/ghost/backup/" class="w-full h-full border-none" style="flex: 1;"></iframe>
+                        </div>
+                    `;
+                    
+                    overlay.addEventListener('click', (ev) => {
+                        if (ev.target === overlay) {
+                            document.body.removeChild(overlay);
+                        }
+                    });
+                    
+                    window.__GHOST_BACKUP_CLOSE_MODAL__ = function() {
+                        if (document.body.contains(overlay)) {
+                            document.body.removeChild(overlay);
+                        }
+                    };
+                    
+                    document.body.appendChild(overlay);
+                });
+            }
+        },
         renderInlineContent: () => {
             return `
                 <div class="flex flex-col gap-4">
@@ -228,9 +279,9 @@
                             <span class="text-sm font-semibold text-grey-900 dark:text-white uppercase tracking-wide">Backup Dashboard</span>
                             <span class="text-[13px] text-grey-500">Launch the one-click Backup & Restore console</span>
                         </div>
-                        <a href="/ghost/backup/" class="h-8 flex items-center rounded-md px-4 text-sm font-medium bg-black text-white hover:bg-grey-900 dark:bg-white dark:text-black dark:hover:bg-grey-200 transition-colors cursor-pointer shadow-sm no-underline" style="text-decoration: none;">
+                        <button id="ghost-backup-open-console" class="h-8 flex items-center rounded-md px-4 text-sm font-medium bg-black text-white hover:bg-grey-900 dark:bg-white dark:text-black dark:hover:bg-grey-200 transition-colors cursor-pointer shadow-sm border-0">
                             Open Console
-                        </a>
+                        </button>
                     </div>
                 </div>
             `;

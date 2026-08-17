@@ -19,58 +19,48 @@
     <style>
         :root {
             --bg-primary: #ffffff;
-            --bg-secondary: #f9fafb;
-            --bg-tertiary: #f3f4f6;
-            --text-primary: #111827;
-            --text-secondary: #6b7280;
-            --text-tertiary: #9ca3af;
-            --border: #e5e7eb;
-            --border-light: #f0f3f6;
-            --accent: #6366f1;
-            --accent-hover: #4f46e5;
-            --success: #10b981;
-            --success-bg: #ecfdf5;
-            --danger: #ef4444;
-            --danger-hover: #dc2626;
-            --danger-bg: #fef2f2;
-            --warning: #f59e0b;
-            --warning-bg: #fffbeb;
-            --shadow: rgba(0,0,0,0.06);
+            --bg-secondary: #fdfdfd;
+            --bg-hover: #f3f4f6;
+            --text-primary: #15171a;
+            --text-secondary: #738a94;
+            --text-tertiary: #aeb4c0;
+            --border: #e6ecef;
+            --btn-primary-bg: #15171a;
+            --btn-primary-text: #ffffff;
+            --btn-danger-bg: #e25440;
+            --btn-danger-hover: #c9402c;
+            --success: #30c971;
+            --warning: #f1c40f;
+            --danger: #e25440;
         }
 
         .dark {
             --bg-primary: #15171a;
-            --bg-secondary: #191b1f;
-            --bg-tertiary: #1e2025;
-            --text-primary: #f3f4f6;
-            --text-secondary: #9ca3af;
-            --text-tertiary: #6b7280;
+            --bg-secondary: #1a1d22;
+            --bg-hover: #20242b;
+            --text-primary: #ffffff;
+            --text-secondary: #8c9da9;
+            --text-tertiary: #5d6775;
             --border: #2a2e35;
-            --border-light: #24272c;
-            --accent: #818cf8;
-            --accent-hover: #6366f1;
-            --success: #34d399;
-            --success-bg: #064e3b33;
-            --danger: #f87171;
-            --danger-hover: #ef4444;
-            --danger-bg: #7f1d1d33;
-            --warning: #fbbf24;
-            --warning-bg: #78350f33;
-            --shadow: rgba(0,0,0,0.2);
+            --btn-primary-bg: #ffffff;
+            --btn-primary-text: #15171a;
+            --btn-danger-bg: #f26651;
+            --btn-danger-hover: #e25440;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
             background: var(--bg-primary);
             color: var(--text-primary);
             line-height: 1.5;
             overflow: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
         .container {
-            max-width: 100%;
+            width: 100%;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -79,202 +69,175 @@
 
         /* ── Header ───────────────────────────── */
         .header {
-            padding: 20px 28px;
-            border-bottom: 1px solid var(--border-light);
+            padding: 24px 32px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-shrink: 0;
+            border-bottom: 1px solid var(--border);
         }
 
-        .header-left { display: flex; align-items: center; gap: 14px; }
-
-        .header-icon {
-            width: 40px; height: 40px;
-            background: var(--bg-tertiary);
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            color: var(--accent);
+        .header h1 { 
+            font-size: 20px; 
+            font-weight: 700; 
+            letter-spacing: -0.01em;
         }
-
-        .header h1 { font-size: 18px; font-weight: 700; }
-        .header p { font-size: 13px; color: var(--text-secondary); margin-top: 1px; }
+        
+        .header p { 
+            font-size: 14px; 
+            color: var(--text-secondary); 
+            margin-top: 4px; 
+        }
 
         .close-btn {
             background: none; border: none;
             color: var(--text-tertiary); cursor: pointer;
-            padding: 6px; border-radius: 6px;
+            padding: 8px; border-radius: 8px;
             display: flex; align-items: center; justify-content: center;
-            transition: all 0.15s;
+            transition: all 0.2s;
         }
-        .close-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+        .close-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
 
         /* ── Content ──────────────────────────── */
         .content {
             flex: 1;
             overflow-y: auto;
-            padding: 24px 28px;
+            padding: 32px;
         }
 
-        /* ── System Info ──────────────────────── */
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
-            margin-bottom: 28px;
-        }
-
-        .info-card {
-            background: var(--bg-secondary);
+        /* ── System Info List ─────────────────── */
+        .info-list {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 32px;
             border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 14px 16px;
+            border-radius: 8px;
+            background: var(--bg-secondary);
         }
 
-        .info-card .label {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-tertiary);
-            margin-bottom: 4px;
-        }
-
-        .info-card .value {
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
             font-size: 14px;
+        }
+        .info-item:last-child { border-bottom: none; }
+
+        .info-item .label {
             font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .info-item .value {
+            font-weight: 600;
             color: var(--text-primary);
+            text-align: right;
+            max-width: 60%;
             word-break: break-all;
         }
 
-        .info-card .value.accent { color: var(--accent); }
-        .info-card .value.success { color: var(--success); }
+        .value.success { color: var(--success); }
 
         /* ── Sections ─────────────────────────── */
         .section {
-            margin-bottom: 24px;
+            margin-bottom: 32px;
         }
 
         .section-header {
-            display: flex; align-items: center; gap: 10px;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
 
         .section-header h2 {
-            font-size: 15px;
-            font-weight: 600;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .section-header .badge {
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-weight: 500;
-        }
-        .badge-export { background: var(--success-bg); color: var(--success); }
-        .badge-import { background: var(--warning-bg); color: var(--warning); }
-
-        /* ── Action Cards ─────────────────────── */
-        .action-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px 24px;
-        }
-
-        .action-card p {
-            font-size: 13.5px;
+        .section-header p {
+            font-size: 14px;
             color: var(--text-secondary);
-            margin-bottom: 16px;
-            line-height: 1.6;
+            margin-top: 4px;
+            line-height: 1.5;
         }
 
         /* ── Buttons ──────────────────────────── */
         .btn {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
-            padding: 10px 20px;
+            padding: 10px 18px;
             font-size: 14px;
             font-weight: 600;
-            border-radius: 8px;
+            border-radius: 6px;
             border: none;
             cursor: pointer;
-            transition: all 0.15s;
+            transition: all 0.2s;
             font-family: inherit;
         }
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .btn-primary {
-            background: var(--accent);
-            color: #ffffff;
+            background: var(--btn-primary-bg);
+            color: var(--btn-primary-text);
         }
-        .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+        .btn-primary:hover:not(:disabled) { opacity: 0.85; }
 
         .btn-danger {
-            background: var(--danger);
+            background: var(--btn-danger-bg);
             color: #ffffff;
         }
-        .btn-danger:hover:not(:disabled) { background: var(--danger-hover); }
+        .btn-danger:hover:not(:disabled) { background: var(--btn-danger-hover); }
 
         .btn-outline {
             background: transparent;
             color: var(--text-primary);
             border: 1px solid var(--border);
         }
-        .btn-outline:hover:not(:disabled) { background: var(--bg-tertiary); }
+        .btn-outline:hover:not(:disabled) { background: var(--bg-hover); }
 
         /* ── Upload Zone ──────────────────────── */
         .upload-zone {
-            border: 2px dashed var(--border);
-            border-radius: 10px;
-            padding: 32px;
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            padding: 24px;
             text-align: center;
             transition: all 0.2s;
             cursor: pointer;
+            background: var(--bg-secondary);
             margin-bottom: 16px;
         }
 
-        .upload-zone.dragover {
-            border-color: var(--accent);
-            background: var(--bg-tertiary);
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--text-tertiary);
+            background: var(--bg-hover);
         }
 
-        .upload-zone svg { color: var(--text-tertiary); margin-bottom: 10px; }
-        .upload-zone .upload-text { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
-        .upload-zone .upload-hint { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
-
+        .upload-zone svg { color: var(--text-tertiary); margin-bottom: 8px; }
+        .upload-zone .upload-text { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+        .upload-zone .upload-hint { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
         .upload-zone input[type="file"] { display: none; }
 
         /* ── Progress ─────────────────────────── */
-        .progress-wrap {
-            margin-top: 16px;
-            display: none;
-        }
-
+        .progress-wrap { margin-top: 16px; display: none; }
         .progress-wrap.visible { display: block; }
-
         .progress-bar-bg {
-            width: 100%;
-            height: 6px;
-            background: var(--bg-tertiary);
-            border-radius: 3px;
-            overflow: hidden;
+            width: 100%; height: 4px;
+            background: var(--bg-hover);
+            border-radius: 2px; overflow: hidden;
             margin-bottom: 8px;
         }
-
         .progress-bar-fill {
-            height: 100%;
-            background: var(--accent);
-            border-radius: 3px;
-            width: 0%;
+            height: 100%; background: var(--success);
+            border-radius: 2px; width: 0%;
             transition: width 0.3s ease;
         }
-
         .progress-bar-fill.indeterminate {
             width: 40%;
             animation: indeterminate 1.5s infinite ease-in-out;
@@ -284,196 +247,120 @@
             0% { transform: translateX(-100%); }
             100% { transform: translateX(350%); }
         }
-
-        .progress-text {
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
+        .progress-text { font-size: 13px; color: var(--text-secondary); }
 
         /* ── Notification ─────────────────────── */
         .notification {
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 13.5px;
-            font-weight: 500;
-            margin-top: 12px;
-            display: none;
-            align-items: center;
-            gap: 8px;
+            padding: 12px 16px; border-radius: 6px;
+            font-size: 14px; font-weight: 500;
+            margin-top: 16px; display: none;
+            align-items: center; gap: 8px;
         }
-
         .notification.visible { display: flex; }
-
-        .notification.success { background: var(--success-bg); color: var(--success); }
-        .notification.error { background: var(--danger-bg); color: var(--danger); }
+        .notification.success { background: rgba(48, 201, 113, 0.1); color: var(--success); }
+        .notification.error { background: rgba(226, 84, 64, 0.1); color: var(--danger); }
 
         /* ── Confirm Dialog ───────────────────── */
         .confirm-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 10;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); display: none;
+            justify-content: center; align-items: center; z-index: 100;
+            backdrop-filter: blur(2px);
         }
-
         .confirm-overlay.visible { display: flex; }
-
         .confirm-box {
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 28px;
-            max-width: 440px;
-            width: 90%;
-            box-shadow: 0 20px 40px var(--shadow);
+            background: var(--bg-primary); border: 1px solid var(--border);
+            border-radius: 12px; padding: 32px;
+            max-width: 420px; width: 90%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
-
-        .confirm-box h3 {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .confirm-box p {
-            font-size: 13.5px;
-            color: var(--text-secondary);
-            margin-bottom: 20px;
-            line-height: 1.6;
-        }
-
-        .confirm-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-
-        /* ── Media list ───────────────────────── */
-        .media-tags {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            margin-top: 4px;
-        }
-
-        .media-tag {
-            font-size: 11px;
-            padding: 2px 8px;
-            background: var(--bg-tertiary);
-            border-radius: 4px;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
+        .confirm-box h3 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+        .confirm-box p { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.5; }
+        .confirm-actions { display: flex; gap: 12px; justify-content: flex-end; }
+        
+        .flex-row { display: flex; gap: 12px; align-items: center; }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div class="header-left">
-                <div class="header-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line>
-                    </svg>
-                </div>
-                <div>
-                    <h1>Backup & Restore</h1>
-                    <p>Full-system snapshots — database and media assets</p>
-                </div>
+            <div>
+                <h1>Backup & Restore</h1>
+                <p>Manage system snapshots and media assets</p>
             </div>
-            <button class="close-btn" onclick="window.parent && window.parent !== window ? window.parent.location.hash = '#/settings' : window.location.href = '/ghost/#/settings'">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            <button class="close-btn" onclick="if(window.parent && typeof window.parent.__GHOST_BACKUP_CLOSE_MODAL__ === 'function') { window.parent.__GHOST_BACKUP_CLOSE_MODAL__(); } else if (window.parent && window.parent !== window) { window.parent.location.hash = '#/settings'; } else { window.location.href = '/ghost/#/settings'; }">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
         </div>
 
         <!-- Content -->
         <div class="content">
-            <!-- System Info Grid -->
-            <div class="info-grid" id="infoGrid">
-                <div class="info-card">
-                    <div class="label">Ghost Version</div>
-                    <div class="value" id="infoGhostVersion">—</div>
+            <!-- System Info -->
+            <div class="info-list" id="infoGrid">
+                <div class="info-item">
+                    <span class="label">Database Engine</span>
+                    <span class="value" id="infoDbClient">—</span>
                 </div>
-                <div class="info-card">
-                    <div class="label">Database</div>
-                    <div class="value accent" id="infoDbClient">—</div>
+                <div class="info-item">
+                    <span class="label">Content Path</span>
+                    <span class="value" id="infoContentPath" style="font-size: 12px; opacity: 0.8;">—</span>
                 </div>
-                <div class="info-card">
-                    <div class="label">Content Path</div>
-                    <div class="value" id="infoContentPath">—</div>
+                <div class="info-item">
+                    <span class="label">Content Statistics</span>
+                    <span class="value" id="infoStats">—</span>
                 </div>
-                <div class="info-card">
-                    <div class="label">Media Directories</div>
-                    <div class="value" id="infoMediaDirs">—</div>
+                <div class="info-item">
+                    <span class="label">Included Data</span>
+                    <span class="value success" id="infoMediaDirs">Complete JSON & Media Data</span>
                 </div>
             </div>
 
             <!-- Export Section -->
             <div class="section">
                 <div class="section-header">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <h2>Export System Backup</h2>
+                    <p>Download a complete `.tar.gz` snapshot containing your cross-engine database and all media assets.</p>
+                </div>
+                <button class="btn btn-primary" id="exportBtn" onclick="startExport()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                         <polyline points="7 10 12 15 17 10"></polyline>
                         <line x1="12" y1="15" x2="12" y2="3"></line>
                     </svg>
-                    <h2>Create Backup</h2>
-                    <span class="badge badge-export">Export</span>
+                    Download Backup
+                </button>
+                <div class="progress-wrap" id="exportProgress">
+                    <div class="progress-bar-bg"><div class="progress-bar-fill indeterminate" id="exportProgressBar"></div></div>
+                    <div class="progress-text" id="exportProgressText">Generating backup archive...</div>
                 </div>
-                <div class="action-card">
-                    <p>Create a full-system snapshot containing your database and all media assets (images, files, themes). The backup will be downloaded as a single compressed <code>.tar.gz</code> archive.</p>
-                    <button class="btn btn-primary" id="exportBtn" onclick="startExport()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="7 10 12 15 17 10"></polyline>
-                            <line x1="12" y1="15" x2="12" y2="3"></line>
-                        </svg>
-                        Create Backup
-                    </button>
-                    <div class="progress-wrap" id="exportProgress">
-                        <div class="progress-bar-bg"><div class="progress-bar-fill indeterminate" id="exportProgressBar"></div></div>
-                        <div class="progress-text" id="exportProgressText">Generating backup archive... This may take a few minutes.</div>
-                    </div>
-                    <div class="notification" id="exportNotification"></div>
-                </div>
+                <div class="notification" id="exportNotification"></div>
             </div>
 
             <!-- Import Section -->
-            <div class="section">
+            <div class="section" style="margin-top: 48px; border-top: 1px solid var(--border); padding-top: 32px;">
                 <div class="section-header">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <h2>Restore from Backup</h2>
+                    <p>Upload a `.tar.gz` snapshot to securely restore your site. This will overwrite your current database and media content.</p>
+                </div>
+                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                         <polyline points="17 8 12 3 7 8"></polyline>
                         <line x1="12" y1="3" x2="12" y2="15"></line>
                     </svg>
-                    <h2>Restore from Backup</h2>
-                    <span class="badge badge-import">Import</span>
+                    <div class="upload-text" id="uploadText">Click to select backup archive</div>
+                    <div class="upload-hint">max <span id="maxUploadSize">500</span> MB</div>
+                    <input type="file" id="fileInput" accept=".tar.gz,.tgz,application/gzip,application/x-gzip">
                 </div>
-                <div class="action-card">
-                    <p>Upload a previously exported <code>.tar.gz</code> backup archive to fully restore your database and media assets. <strong>Warning:</strong> this will overwrite all current data.</p>
-                    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
-                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="17 8 12 3 7 8"></polyline>
-                            <line x1="12" y1="3" x2="12" y2="15"></line>
-                        </svg>
-                        <div class="upload-text" id="uploadText">Drop your backup archive here, or click to browse</div>
-                        <div class="upload-hint">.tar.gz files only — max <span id="maxUploadSize">500</span> MB</div>
-                        <input type="file" id="fileInput" accept=".tar.gz,.tgz,application/gzip,application/x-gzip">
-                    </div>
-                    <button class="btn btn-danger" id="importBtn" onclick="confirmImport()" disabled>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="17 8 12 3 7 8"></polyline>
-                            <line x1="12" y1="3" x2="12" y2="15"></line>
-                        </svg>
-                        Restore Backup
-                    </button>
-                    <div class="progress-wrap" id="importProgress">
-                        <div class="progress-bar-bg"><div class="progress-bar-fill" id="importProgressBar"></div></div>
-                        <div class="progress-text" id="importProgressText">Uploading and restoring...</div>
-                    </div>
-                    <div class="notification" id="importNotification"></div>
+                <button class="btn btn-danger" id="importBtn" onclick="confirmImport()" disabled style="width: 100%;">
+                    Restore System Data
+                </button>
+                <div class="progress-wrap" id="importProgress">
+                    <div class="progress-bar-bg"><div class="progress-bar-fill" id="importProgressBar"></div></div>
+                    <div class="progress-text" id="importProgressText">Uploading and restoring...</div>
                 </div>
+                <div class="notification" id="importNotification"></div>
             </div>
         </div>
     </div>
@@ -481,8 +368,8 @@
     <!-- Confirm Dialog -->
     <div class="confirm-overlay" id="confirmOverlay">
         <div class="confirm-box">
-            <h3>⚠️ Confirm Full Restore</h3>
-            <p>This will <strong>overwrite your entire database</strong> and all media assets with the contents of the uploaded backup. This action cannot be undone. Are you sure you want to proceed?</p>
+            <h3>⚠️ Confirm System Restore</h3>
+            <p>This action will <strong>irreversibly overwrite</strong> your entire database and media library with the contents of the uploaded snapshot. Are you absolutely sure?</p>
             <div class="confirm-actions">
                 <button class="btn btn-outline" onclick="cancelImport()">Cancel</button>
                 <button class="btn btn-danger" onclick="executeImport()">Yes, Restore Now</button>
@@ -491,50 +378,35 @@
     </div>
 
     <script>
-
-
-        // ── State ────────────────────────────────────────────────
         let selectedFile = null;
 
-        // ── Load System Status ───────────────────────────────────
         async function loadStatus() {
             try {
                 const res = await fetch('/ghost/backup/api/status', {
                     headers: { 'x-ghost-backup-request': '1' }
                 });
-                if (!res.ok) throw new Error('Failed to fetch status');
+                if (!res.ok) return;
                 const data = await res.json();
-
-                document.getElementById('infoGhostVersion').textContent = data.ghostVersion || '—';
-                document.getElementById('infoDbClient').textContent = (data.dbClient || '—').toUpperCase();
-                document.getElementById('infoContentPath').textContent = data.contentPath || 'NOT RESOLVED';
-
-                const mediaDirsEl = document.getElementById('infoMediaDirs');
-                if (data.mediaDirs && data.mediaDirs.length > 0) {
-                    mediaDirsEl.innerHTML = '';
-                    const tagsDiv = document.createElement('div');
-                    tagsDiv.className = 'media-tags';
-                    data.mediaDirs.forEach(d => {
-                        const tag = document.createElement('span');
-                        tag.className = 'media-tag';
-                        tag.textContent = d + '/';
-                        tagsDiv.appendChild(tag);
-                    });
-                    mediaDirsEl.appendChild(tagsDiv);
-                } else {
-                    mediaDirsEl.textContent = 'None detected';
+                
+                document.getElementById('infoDbClient').textContent = (data.dbClient || 'unknown').toUpperCase();
+                document.getElementById('infoContentPath').textContent = data.contentPath || '—';
+                
+                if (data.stats) {
+                    document.getElementById('infoStats').innerHTML = `
+                        <div style="font-size: 13px; font-weight: normal; color: var(--text-secondary);">
+                            <span style="color: var(--text-primary); font-weight: 600;">${data.stats.posts}</span> Posts &middot; 
+                            <span style="color: var(--text-primary); font-weight: 600;">${data.stats.pages}</span> Pages &middot; 
+                            <span style="color: var(--text-primary); font-weight: 600;">${data.stats.tags}</span> Tags &middot; 
+                            <span style="color: var(--text-primary); font-weight: 600;">${data.stats.members}</span> Members
+                        </div>
+                    `;
                 }
-
-                if (data.maxUploadMB) {
-                    document.getElementById('maxUploadSize').textContent = data.maxUploadMB;
-                }
-            } catch (e) {
-                console.error('[ghost-backup UI] Status load failed:', e);
-            }
+                
+                if (data.maxUploadMB) document.getElementById('maxUploadSize').textContent = data.maxUploadMB;
+            } catch (e) {}
         }
         loadStatus();
 
-        // ── Export ───────────────────────────────────────────────
         async function startExport() {
             const btn = document.getElementById('exportBtn');
             const progress = document.getElementById('exportProgress');
@@ -549,13 +421,10 @@
                     method: 'POST',
                     headers: { 'x-ghost-backup-request': '1' }
                 });
-
                 if (!res.ok) {
                     const err = await res.json().catch(() => ({ error: 'Unknown error' }));
                     throw new Error(err.error || 'Export failed');
                 }
-
-                // Download the streamed archive
                 const blob = await res.blob();
                 const disposition = res.headers.get('content-disposition') || '';
                 const filenameMatch = disposition.match(/filename="?(.+?)"?$/);
@@ -569,41 +438,26 @@
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-
-                showNotification('exportNotification', 'success', '✓ Backup created and downloaded successfully.');
+                showNotification('exportNotification', 'success', 'Backup created and downloaded successfully.');
             } catch (e) {
-                showNotification('exportNotification', 'error', '✗ ' + e.message);
+                showNotification('exportNotification', 'error', e.message);
             } finally {
                 btn.disabled = false;
                 progress.classList.remove('visible');
             }
         }
 
-        // ── File Selection ──────────────────────────────────────
         const uploadZone = document.getElementById('uploadZone');
         const fileInput = document.getElementById('fileInput');
 
-        uploadZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadZone.classList.add('dragover');
-        });
-
-        uploadZone.addEventListener('dragleave', () => {
-            uploadZone.classList.remove('dragover');
-        });
-
+        uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+        uploadZone.addEventListener('dragleave', () => { uploadZone.classList.remove('dragover'); });
         uploadZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadZone.classList.remove('dragover');
-            if (e.dataTransfer.files.length > 0) {
-                handleFileSelect(e.dataTransfer.files[0]);
-            }
+            e.preventDefault(); uploadZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) handleFileSelect(e.dataTransfer.files[0]);
         });
-
         fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                handleFileSelect(e.target.files[0]);
-            }
+            if (e.target.files.length > 0) handleFileSelect(e.target.files[0]);
         });
 
         function handleFileSelect(file) {
@@ -614,18 +468,11 @@
             document.getElementById('importNotification').classList.remove('visible');
         }
 
-        // ── Import ──────────────────────────────────────────────
-        function confirmImport() {
-            document.getElementById('confirmOverlay').classList.add('visible');
-        }
-
-        function cancelImport() {
-            document.getElementById('confirmOverlay').classList.remove('visible');
-        }
+        function confirmImport() { document.getElementById('confirmOverlay').classList.add('visible'); }
+        function cancelImport() { document.getElementById('confirmOverlay').classList.remove('visible'); }
 
         async function executeImport() {
             document.getElementById('confirmOverlay').classList.remove('visible');
-
             if (!selectedFile) return;
 
             const btn = document.getElementById('importBtn');
@@ -641,13 +488,11 @@
             progressBar.classList.remove('indeterminate');
 
             try {
-                // Use XMLHttpRequest for upload progress tracking
-                const result = await new Promise((resolve, reject) => {
+                await new Promise((resolve, reject) => {
                     const xhr = new XMLHttpRequest();
                     xhr.open('POST', '/ghost/backup/api/import');
                     xhr.setRequestHeader('x-ghost-backup-request', '1');
                     xhr.setRequestHeader('Content-Type', 'application/gzip');
-
                     xhr.upload.addEventListener('progress', (e) => {
                         if (e.lengthComputable) {
                             const pct = Math.round((e.loaded / e.total) * 100);
@@ -655,37 +500,27 @@
                             progressText.textContent = `Uploading... ${pct}%`;
                         }
                     });
-
                     xhr.upload.addEventListener('loadend', () => {
                         progressBar.style.width = '100%';
                         progressBar.classList.add('indeterminate');
                         progressText.textContent = 'Restoring database and media assets... Please wait.';
                     });
-
                     xhr.addEventListener('load', () => {
                         try {
                             const data = JSON.parse(xhr.responseText);
-                            if (xhr.status >= 200 && xhr.status < 300 && data.ok) {
-                                resolve(data);
-                            } else {
-                                reject(new Error(data.error || 'Import failed'));
-                            }
-                        } catch (e) {
-                            reject(new Error('Invalid server response'));
-                        }
+                            if (xhr.status >= 200 && xhr.status < 300 && data.ok) resolve(data);
+                            else reject(new Error(data.error || 'Import failed'));
+                        } catch (e) { reject(new Error('Invalid server response')); }
                     });
-
                     xhr.addEventListener('error', () => reject(new Error('Network error during upload')));
                     xhr.addEventListener('abort', () => reject(new Error('Upload aborted')));
-
                     xhr.send(selectedFile);
                 });
-
                 progressBar.classList.remove('indeterminate');
                 progressBar.style.width = '100%';
-                showNotification('importNotification', 'success', '✓ Backup restored successfully. A Ghost restart may be required for full effect.');
+                showNotification('importNotification', 'success', 'Backup restored successfully. A Ghost restart may be required.');
             } catch (e) {
-                showNotification('importNotification', 'error', '✗ ' + e.message);
+                showNotification('importNotification', 'error', e.message);
             } finally {
                 btn.disabled = false;
                 progress.classList.remove('visible');
@@ -693,7 +528,6 @@
             }
         }
 
-        // ── Helpers ──────────────────────────────────────────────
         function showNotification(id, type, message) {
             const el = document.getElementById(id);
             el.className = `notification visible ${type}`;
