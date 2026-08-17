@@ -138,6 +138,10 @@ async function requireAdminAuth(req, res, next) {
     }
   }
 
+  if (req.accepts('html') && !req.path.startsWith('/api')) {
+    return res.redirect('/ghost/#/signin');
+  }
+
   res.status(401).json({ error: 'Unauthorized. Ghost Admin session required.' });
 }
 
@@ -152,8 +156,19 @@ router.get('/', requireFetchDestination(['iframe', 'frame', 'document']), (req, 
   res.sendFile(path.join(__dirname, '../ui/index.html'));
 });
 
-// GET /api/status — Returns system info: resolved paths, DB config (masked), Ghost version
-router.get('/api/status', requireInternalRequest, (req, res) => {
+// Load Ghost's core knex connection dynamically for DB stats
+let ghostKnex = null;
+try {
+  const knexPath = getGhostPath('core/server/data/db/connection');
+  if (knexPath) {
+    ghostKnex = require(knexPath);
+  }
+} catch (e) {
+  console.error('[ghost-backup] Failed to load Ghost knex connection:', e.message);
+}
+
+// GET /api/status — Returns system info: resolved paths, DB config (masked), Ghost version, and DB stats
+router.get('/api/status', requireInternalRequest, async (req, res) => {
   try {
     const contentPath = pathResolver.resolveContentPath();
     const dbConfig = pathResolver.resolveDbConfig();
@@ -175,6 +190,28 @@ router.get('/api/status', requireInternalRequest, (req, res) => {
         };
       }
     }
+    
+    // Gather database statistics
+    let stats = { posts: 0, pages: 0, tags: 0, members: 0, users: 0 };
+    if (ghostKnex) {
+      try {
+        const fetchCount = async (table, condition) => {
+          let q = ghostKnex(table);
+          if (condition) q = q.where(condition);
+          const res = await q.count('* as count').first();
+          return parseInt(res.count || 0, 10);
+        };
+        stats.posts = await fetchCount('posts', { type: 'post' });
+        stats.pages = await fetchCount('posts', { type: 'page' });
+        stats.tags = await fetchCount('tags');
+        
+        // Members table might not exist in extremely old Ghost versions, wrap safely
+        try { stats.members = await fetchCount('members'); } catch(e) {}
+        try { stats.users = await fetchCount('users'); } catch(e) {}
+      } catch (e) {
+        console.warn('[ghost-backup] Failed to fetch database stats:', e.message);
+      }
+    }
 
     res.json({
       ghostVersion,
@@ -183,6 +220,7 @@ router.get('/api/status', requireInternalRequest, (req, res) => {
       dbClient: dbConfig ? dbConfig.client : 'NOT RESOLVED',
       dbConnection: maskedConnection,
       mediaDirs,
+      stats,
       maxUploadMB: parseInt(process.env.GHOST_BACKUP_MAX_UPLOAD_MB || '500', 10)
     });
   } catch (err) {

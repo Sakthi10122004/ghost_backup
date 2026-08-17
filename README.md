@@ -2,20 +2,20 @@
 
 **Ghost Backup** is a powerful, enterprise-ready side-car plugin for Ghost CMS that provides one-click full-system backup and restore capabilities directly from the native Ghost Admin panel—without ever altering a single line of Ghost's core source code.
 
-This plugin exports and imports both the database (SQLite3 or MySQL) and all media content into a single compressed `.tar.gz` archive, with streaming I/O to prevent memory exhaustion on large sites.
+This plugin exports your database and media content into a single compressed `.tar.gz` archive. It uses Ghost's native engine-agnostic JSON export format, meaning you can flawlessly migrate between SQLite3 and MySQL instances without ever breaking your site or experiencing database engine conflicts.
 
 ---
 
 ## Architecture & Security Highlights
 
 - **Zero Core Modifications**: Operates strictly within Ghost's native security perimeter. No core files are touched.
-- **Dual-Database Support**: Automatically detects and handles both SQLite3 (development) and MySQL (production) environments.
+- **Flawless Cross-Engine Migration**: Replaces fragile `mysqldump` and file copying with Ghost's native JSON data export. You can seamlessly backup a MySQL production server and restore it to a local SQLite development environment (and vice versa).
 - **Dynamic Path Resolution**: Zero hardcoded paths. Resolves Ghost's content directory and database configuration through environment variables, config files, and filesystem detection.
-- **Streaming I/O**: Both export and import operations use streaming pipelines — `mysqldump` output pipes directly to temp files, and `tar.create()` streams directly to the HTTP response. No full-archive memory buffering.
+- **Streaming I/O**: Export and import operations use streaming pipelines — `tar.create()` streams directly to the HTTP response to prevent memory exhaustion.
 - **Container Hardened**: All temporary file processing uses `/tmp`, so the plugin operates flawlessly inside hardened Kubernetes environments with `readOnlyRootFilesystem: true`.
 - **Same-Origin & RBAC Security**: Full Ghost session authentication, Administrator/Owner role-based access control, and Same-Origin request validation on all endpoints.
-- **Idempotent Lifecycle**: Safe cooperative install/uninstall with automatic scheduling pointer handoff to sibling plugins.
-- **Multi-Plugin Coexistence**: Dynamically negotiates the `scheduling.active` boot sequence alongside Ghost MailConfig and Ghost FormBuilder.
+- **Active Theme Protection**: Purposefully excludes the `themes/` directory during export and configuration files during import to prevent "missing theme" errors and database corruption on the target instance.
+- **Idempotent Lifecycle & Multi-Plugin Coexistence**: Safe cooperative install/uninstall alongside Ghost MailConfig and Ghost FormBuilder.
 
 ---
 
@@ -71,8 +71,6 @@ securityContext:
     drop: ["ALL"]
 ```
 
-**Important for MySQL environments:** Ensure `mysqldump` and `mysql` CLI tools are available in your container image. The default `ghost:5-alpine` image includes them when using MySQL as the database client.
-
 ---
 
 ## Usage
@@ -97,11 +95,13 @@ securityContext:
 
 ## What's Included in a Backup
 
-| Component | SQLite3 | MySQL |
+| Component | Format & Location | Description |
 |---|---|---|
-| Database dump | `db_dump.sqlite3` (file copy) | `db_dump.sql` (mysqldump) |
-| Images | `content/images/` | `content/images/` |
-| Files | `content/files/` | `content/files/` |
-| Media | `content/media/` | `content/media/` |
-| Themes | `content/themes/` | `content/themes/` |
-| Manifest | `manifest.json` | `manifest.json` |
+| **Database** | `ghost-backup.json` | Engine-agnostic database dump (Posts, Users, Tags, Settings) |
+| **Media Assets** | `content/images/`, `media/`, `files/` | Uploaded images, videos, audio, and documents |
+| **Routing & Config** | `content/settings/` | `routes.yaml` and `redirects.yaml` |
+| **Logs** | `content/logs/` | Runtime application logs |
+| **Root Configs** | `config.*.json` | Captured for reference within the archive (safely bypassed on restore) |
+| **Manifest** | `manifest.json` | Backup metadata and versioning |
+
+*(Note: The `themes/` folder is intentionally excluded to ensure your active theme isn't disrupted during migration).*

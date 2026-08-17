@@ -163,7 +163,7 @@ function normalizeDbConfig(dbConfig) {
 function discoverMediaDirs(contentPath) {
     if (!contentPath || !fs.existsSync(contentPath)) return [];
     
-    const mediaCandidates = ['images', 'files', 'media', 'themes'];
+    const mediaCandidates = ['images', 'files', 'media', 'settings', 'logs'];
     const found = [];
 
     for (const dir of mediaCandidates) {

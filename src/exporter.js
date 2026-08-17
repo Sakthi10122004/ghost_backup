@@ -36,13 +36,17 @@ async function createBackup(res) {
         // 2. Create staging directory
         fs.mkdirSync(tmpDir, { recursive: true });
 
-        // 3. Dump the database
-        const isSqlite = dbConfig.client === 'sqlite3' || dbConfig.client === 'better-sqlite3';
-        if (isSqlite) {
-            await dumpSqlite(dbConfig, tmpDir);
-        } else {
-            await dumpMysql(dbConfig, tmpDir);
+        // 3. Dump the database using Ghost's native JSON exporter
+        const { getGhostPath } = require('./utils');
+        const ghostExporterPath = getGhostPath('core/server/data/exporter');
+        if (!ghostExporterPath) {
+            throw new Error('Could not locate Ghost native exporter module.');
         }
+        
+        const ghostExporter = require(ghostExporterPath);
+        console.log(`[ghost-backup] Generating engine-agnostic JSON database dump...`);
+        const exportData = await ghostExporter.doExport();
+        fs.writeFileSync(path.join(tmpDir, 'ghost-backup.json'), JSON.stringify(exportData));
 
         // 4. Copy media directories into staging area
         const contentStagingDir = path.join(tmpDir, 'content');
@@ -56,21 +60,37 @@ async function createBackup(res) {
 
         // 5. Write manifest.json
         const manifest = {
-            version: '1.0.0',
+            version: '2.0.0', // Bump version for cross-engine support
             timestamp: new Date().toISOString(),
             ghostVersion,
             nodeVersion: process.version,
-            dbClient: dbConfig.client,
-            dbFilename: (dbConfig.client === 'sqlite3' || dbConfig.client === 'better-sqlite3') ? 'db_dump.sqlite3' : 'db_dump.sql',
+            dbClient: 'engine-agnostic',
+            dbFormat: 'json',
+            dbFilename: 'ghost-backup.json',
             contentPath,
             mediaDirs
         };
         fs.writeFileSync(path.join(tmpDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
 
+        // 5.5 Copy config files (for reference, not restored automatically)
+        const ghostRoot = process.env.INIT_CWD || process.cwd();
+        const configFiles = ['config.production.json', 'config.development.json'];
+        for (const file of configFiles) {
+            const configPath = path.join(ghostRoot, file);
+            if (fs.existsSync(configPath)) {
+                fs.copyFileSync(configPath, path.join(tmpDir, file));
+            }
+        }
+
         // 6. Collect all entries for the tar archive
         const entries = ['manifest.json', manifest.dbFilename];
         if (fs.existsSync(contentStagingDir) && fs.readdirSync(contentStagingDir).length > 0) {
             entries.push('content');
+        }
+        for (const file of configFiles) {
+            if (fs.existsSync(path.join(tmpDir, file))) {
+                entries.push(file);
+            }
         }
 
         // 7. Stream tar.gz directly to HTTP response
@@ -107,78 +127,6 @@ async function createBackup(res) {
     }
 }
 
-/**
- * SQLite3: Copy the database file directly into the staging directory.
- */
-function dumpSqlite(dbConfig, tmpDir) {
-    return new Promise((resolve, reject) => {
-        const dbFilePath = dbConfig.connection.filename;
-
-        if (!dbFilePath || !fs.existsSync(dbFilePath)) {
-            return reject(new Error(`SQLite database file not found: ${dbFilePath}`));
-        }
-
-        const destPath = path.join(tmpDir, 'db_dump.sqlite3');
-
-        try {
-            fs.copyFileSync(dbFilePath, destPath);
-            const stats = fs.statSync(destPath);
-            console.log(`[ghost-backup] SQLite database copied (${(stats.size / 1024 / 1024).toFixed(2)} MB)`);
-            resolve();
-        } catch (err) {
-            reject(new Error(`Failed to copy SQLite database: ${err.message}`));
-        }
-    });
-}
-
-/**
- * MySQL: Spawn mysqldump and write the output to db_dump.sql in the staging directory.
- */
-function dumpMysql(dbConfig, tmpDir) {
-    return new Promise((resolve, reject) => {
-        const conn = dbConfig.connection;
-        const destPath = path.join(tmpDir, 'db_dump.sql');
-        const outStream = fs.createWriteStream(destPath);
-
-        const args = [
-            '--single-transaction',
-            '--routines',
-            '--triggers',
-            '--quick',
-            '-h', conn.host,
-            '-P', String(conn.port),
-            '-u', conn.user,
-            conn.database
-        ];
-
-        const env = { ...process.env };
-        if (conn.password) {
-            env.MYSQL_PWD = conn.password;
-        }
-
-        console.log(`[ghost-backup] Running mysqldump for database: ${conn.database}@${conn.host}:${conn.port}`);
-
-        const proc = spawn('mysqldump', args, { env, stdio: ['ignore', 'pipe', 'pipe'] });
-
-        let stderrData = '';
-        proc.stderr.on('data', (chunk) => { stderrData += chunk.toString(); });
-
-        proc.stdout.pipe(outStream);
-
-        proc.on('close', (code) => {
-            if (code !== 0) {
-                return reject(new Error(`mysqldump exited with code ${code}: ${stderrData.trim()}`));
-            }
-            const stats = fs.statSync(destPath);
-            console.log(`[ghost-backup] MySQL dump completed (${(stats.size / 1024 / 1024).toFixed(2)} MB)`);
-            resolve();
-        });
-
-        proc.on('error', (err) => {
-            reject(new Error(`Failed to spawn mysqldump: ${err.message}. Is mysqldump installed?`));
-        });
-    });
-}
 
 /**
  * Recursively copy a directory preserving structure and permissions.
