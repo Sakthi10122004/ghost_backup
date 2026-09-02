@@ -100,6 +100,7 @@ securityContext:
 | **Database** | `ghost-backup.json` | Engine-agnostic database dump (Posts, Users, Tags, Settings) |
 | **Media Assets** | `content/images/`, `media/`, `files/` | Uploaded images, videos, audio, and documents |
 | **Routing & Config** | `content/settings/` | `routes.yaml` and `redirects.yaml` |
+| **Form Responses** | `content/formbuilder/`, `content/forms/` | Formbuilder plugin response CSVs |
 | **Logs** | `content/logs/` | Runtime application logs |
 | **Root Configs** | `config.*.json` | Captured for reference within the archive (safely bypassed on restore) |
 | **Manifest** | `manifest.json` | Backup metadata and versioning |
