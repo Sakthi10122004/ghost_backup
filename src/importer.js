@@ -98,7 +98,7 @@ async function restoreBackup(req) {
             
             const DataImporter = require(dataImporterPath);
             console.log(`[ghost-backup] Parsing engine-agnostic JSON database dump...`);
-            let importData = { data: JSON.parse(fs.readFileSync(dumpFilePath, 'utf8')) };
+            let importData = JSON.parse(fs.readFileSync(dumpFilePath, 'utf8'));
             
             console.log(`[ghost-backup] Starting engine-agnostic JSON import...`);
             importData = await DataImporter.preProcess(importData);
