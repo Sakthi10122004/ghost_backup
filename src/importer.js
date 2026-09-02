@@ -38,8 +38,9 @@ async function restoreBackup(req) {
             cwd: extractDir,
             // Path traversal defense: reject any entries that escape the extract root
             filter: (entryPath) => {
-                const resolved = path.resolve(extractDir, entryPath);
-                if (!resolved.startsWith(extractDir)) {
+                const resolvedExtractDir = path.resolve(extractDir);
+                const resolved = path.resolve(resolvedExtractDir, entryPath);
+                if (!resolved.startsWith(resolvedExtractDir)) {
                     console.error(`[ghost-backup] SECURITY: Path traversal blocked: ${entryPath}`);
                     return false;
                 }
